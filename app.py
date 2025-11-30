@@ -228,7 +228,7 @@ tk.Button(main_menu_frame, text="Exit",
 # Rules title Label
 tk.Label(rules_screen, text="How to play Blackjack",
          font=("Impact", 24, "bold"),
-         bg='green').pack(pady=0)
+         bg='green').pack(pady=0, fill="x")
 
 # Rules text Text
 rules = """
@@ -242,7 +242,13 @@ rules = """
 
 *The TakeYourMoneyAndRun Corporation is not responsible for any irresponsibility.
 """
-tk.Label(rules_screen, anchor="center", height=100, width=65, text=rules, font=("Arial", 16), justify="left").pack(pady=40)
+tk.Label(rules_screen,
+         anchor="nw",
+         text=rules,
+         font=("Arial", 15),
+         justify="left",
+         wraplength=750
+         ).pack(pady=40, padx=20, fill="both", expand=False)
 
 # Hitting the griddy
 
