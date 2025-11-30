@@ -238,6 +238,7 @@ rules = """
 • You can decide to stay and run your chances or Hit to potentially score closer to 21
 • Whoever scores higher than 21 at any point Busts and loses
 • Whoever scores exactly 21 at any point automatically wins
+• If both you and the dealer score the same, it's a Push; no one wins or loses
 • For best results, wash before use and involve real-world money*
 
 *The TakeYourMoneyAndRun Corporation is not responsible for any irresponsibility.
