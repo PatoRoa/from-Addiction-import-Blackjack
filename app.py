@@ -250,7 +250,6 @@ tk.Label(player_frame, text="Your Hand", font=("Arial", 16), bg="green").pack()
 player_cards_frame = tk.Frame(player_frame, bg="green")
 player_cards_frame.pack(pady=10)
 
-
 # Buttons section
 button_frame = tk.Frame(game_screen, bg="green")
 button_frame.pack(pady=20)
