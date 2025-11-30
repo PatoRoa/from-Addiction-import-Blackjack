@@ -224,6 +224,34 @@ tk.Button(main_menu_frame, text="Exit",
           command=root.quit
           ).pack(pady=10)
 
+############ Rules Screen Frame ############
+# Rules title Label
+tk.Label(rules_screen, text="How to play Blackjack",
+         font=("Impact", 24, "bold"),
+         bg='green').pack(pady=0)
+
+# Rules text Text
+rules = """
+• The goal of Blackjack is to beat the dealer's hand without scoring over 21 in your hand
+• Cards 2 through 10 are worth their rank in points, Jacks, Queens and Kings are worth 10, and Aces are worth either 1 or 11
+• The dealer deals a card to you and themselves, then deals the second card, turning theirs face-down
+• You can decide to stay and run your chances or Hit to potentially score closer to 21
+• Whoever scores higher than 21 at any point Busts and loses
+• Whoever scores exactly 21 at any point automatically wins
+• For best results, wash before use and involve real-world money*
+
+*The TakeYourMoneyAndRun Corporation is not responsible for any irresponsibility.
+"""
+tk.Label(rules_screen, anchor="center", height=100, width=65, text=rules, font=("Arial", 16), justify="left").pack(pady=40)
+
+# Hitting the griddy
+
+# Back to Main Menu button
+tk.Button(rules_screen, text="Main Menu",
+          font=("Impact", 24),
+          width=20,
+          command=lambda: show_frame(main_menu_frame)).pack(pady=10)
+
 ######### Game Screen Frame ############
 
 ###### Hidden back card for dealer########
