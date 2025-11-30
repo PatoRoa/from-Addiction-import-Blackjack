@@ -12,6 +12,9 @@ def goto_game():
     show_frame(game_screen)
     start_round()
 
+########################### GLOBAL VARIABLES ##############################
+# Deck for the current round
+round_deck = []
 
 # Keeps garbage collection from deleting the actual photos
 player_card_images = []
@@ -35,7 +38,7 @@ deck = [(s, r) for s in suits for r in ranks]
 ############################## CARD FUNCTIONS ##############################
 # Draw card function
 def draw_card():
-    return random.choice(deck)
+    return round_deck.pop()
 
 
 def card_to_filename(card):
@@ -55,6 +58,11 @@ def show_card(card, frame, image_list):
 
 ############################ GAME FUNCTIONS ####################################
 def start_round():
+    #shuffles deck
+    global round_deck
+    round_deck = deck.copy()
+    random.shuffle(round_deck)
+    # Clear hands and images
     player_hand.clear()
     dealer_hand.clear()
     player_card_images.clear()
@@ -109,6 +117,8 @@ def player_hit():
     if calculate_hand_value(player_hand) > 21:
         messagebox.showinfo("Bust", "You busted! Dealer wins.")
         end_round(player_lost=True)
+    print("Cards left in deck:", len(round_deck))
+
 
 
 ############################# GAME LOGIC ####################################
