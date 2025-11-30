@@ -74,6 +74,12 @@ def start_round():
     show_card(card1, player_cards_frame, player_card_images)
     show_card(card2, player_cards_frame, player_card_images)
 
+    # Check for auto blackjack
+    if calculate_hand_value(player_hand) == 21:
+        messagebox.showinfo("Blackjack!", "You got a Blackjack! You win!")
+        end_round(player_won=True)
+        return
+
     # Deal one card to dealer (second card hidden later)
     dealer_card1 = draw_card()
     dealer_card2 = draw_card()
