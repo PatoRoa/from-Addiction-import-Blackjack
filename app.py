@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, PhotoImage
-import random
+from deck import Deck
+from card import Card
+
 
 
 #function to switch screens
@@ -8,46 +10,126 @@ def show_frame(frame):
     frame.tkraise() #bring the frame to the front
 
 
-def goto_game():
-    show_frame(game_screen)
-    start_round()
+########################### BlackJack Game CLass ##############################
+class BlackjackGame:
+    def __init__(self):
+        self.player_hand = []
+        self.dealer_hand = []
+        self.player_images = []
+        self.dealer_images = []
+        self.wins = 0
+        self.losses = 0
+        self.deck = None
+        self.hidden_label = None
 
-########################### GLOBAL VARIABLES ##############################
-# Deck for the current round
-round_deck = []
+    def start_round(self):
 
-# Keeps garbage collection from deleting the actual photos
-player_card_images = []
-dealer_card_images = []
+        # New shuffled deck
+        self.deck = Deck()
+        self.deck.shuffle()
 
-# Store cards that the player and dealer have
-player_hand = []
-dealer_hand = []
+        # Clear hands and images
+        self.player_hand.clear()
+        self.dealer_hand.clear()
+        self.player_images.clear()
+        self.dealer_images.clear()
 
-wins = 0
-losses = 0
+        # Clear GUI card frames
+        for widget in player_cards_frame.winfo_children():
+            widget.destroy()
 
-# Setting up the suits and cards
-suits = ["club", "diamond", "heart", "spade"]
-ranks = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+        for widget in dealer_cards_frame.winfo_children():
+            widget.destroy()
 
-# Create full deck of 52 cards
-deck = [(s, r) for s in suits for r in ranks]
+        # Deal player cards
+        c1 = self.deck.draw()
+        c2 = self.deck.draw()
+        self.player_hand.extend([c1, c2])
+        show_card(c1, player_cards_frame, self.player_images)
+        show_card(c2, player_cards_frame, self.player_images)
+
+        # Automatic blackjack check
+        if calculate_hand_value(self.player_hand) == 21:
+            messagebox.showinfo("Blackjack!", "You got a Blackjack! You win!")
+            self.end_round(player_won=True)
+            return
+
+        # Dealer cards
+        d1 = self.deck.draw()
+        d2 = self.deck.draw()
+        self.dealer_hand.extend([d1, d2])
+
+        show_card(d1, dealer_cards_frame, self.dealer_images)
+
+        # Face-down card
+        self.hidden_label = tk.Label(dealer_cards_frame, image=card_back, bg="green")
+        self.hidden_label.pack(side="left")
+
+        hit_button.config(state="normal")
+        stand_button.config(state="normal")
+    
+    def player_hit(self):
+        card = self.deck.draw()
+        self.player_hand.append(card)
+        show_card(card, player_cards_frame, self.player_images)
+
+        if calculate_hand_value(self.player_hand) > 21:
+            messagebox.showinfo("Bust", "You busted! Dealer wins.")
+            self.end_round(player_lost=True)
+
+    def player_stand(self):
+        # Reveal hidden card
+        self.hidden_label.destroy()
+
+        second_card = self.dealer_hand[1]
+        show_card(second_card, dealer_cards_frame, self.dealer_images)
+
+        # Dealer hits until 17+
+        while calculate_hand_value(self.dealer_hand) < 17:
+            card = self.deck.draw()
+            self.dealer_hand.append(card)
+            show_card(card, dealer_cards_frame, self.dealer_images)
+
+        player_value = calculate_hand_value(self.player_hand)
+        dealer_value = calculate_hand_value(self.dealer_hand)
+
+        if dealer_value > 21:
+            messagebox.showinfo("Win", "Dealer busts. You win!")
+            self.end_round(player_won=True)
+
+        elif player_value > dealer_value:
+            messagebox.showinfo("Win", "You win!")
+            self.end_round(player_won=True)
+
+        elif dealer_value > player_value:
+            messagebox.showinfo("Lose", "Dealer wins.")
+            self.end_round(player_lost=True)
+
+        else:
+            messagebox.showinfo("Tie", "Push (tie).")
+            self.end_round()
+
+    def end_round(self, player_won=False, player_lost=False):
+        if player_won:
+            self.wins += 1
+            wins_label.config(text=f"Wins: {self.wins}")
+
+        if player_lost:
+            self.losses += 1
+            losses_label.config(text=f"Losses: {self.losses}")
+
+        # Disable buttons
+        hit_button.config(state="disabled")
+        stand_button.config(state="disabled")
+
+
 
 
 ############################## CARD FUNCTIONS ##############################
-# Draw card function
-def draw_card():
-    return round_deck.pop()
-
-
-def card_to_filename(card):
-    suit, rank = card
-    return f"cards/{suit}_{rank}.png"
 
 
 def show_card(card, frame, image_list):
-    filename = card_to_filename(card)
+    filename = card.filename()
     img = tk.PhotoImage(file=filename).subsample(3)
 
     image_list.append(img)  # prevent garbage collection
@@ -55,79 +137,13 @@ def show_card(card, frame, image_list):
     label = tk.Label(frame, image=img, bg="green")
     label.pack(side="left")
 
-
-############################ GAME FUNCTIONS ####################################
-def start_round():
-    #shuffles deck
-    global round_deck
-    round_deck = deck.copy()
-    random.shuffle(round_deck)
-    # Clear hands and images
-    player_hand.clear()
-    dealer_hand.clear()
-    player_card_images.clear()
-    dealer_card_images.clear()
-
-    # Clear card frames
-    for widget in player_cards_frame.winfo_children():
-        widget.destroy()
-
-    for widget in dealer_cards_frame.winfo_children():
-        widget.destroy()
-
-    # Deal cards to the player
-    card1 = draw_card()
-    card2 = draw_card()
-    player_hand.extend([card1, card2])
-    show_card(card1, player_cards_frame, player_card_images)
-    show_card(card2, player_cards_frame, player_card_images)
-
-    # Check for auto blackjack
-    if calculate_hand_value(player_hand) == 21:
-        messagebox.showinfo("Blackjack!", "You got a Blackjack! You win!")
-        end_round(player_won=True)
-        return
-
-    # Deal one card to dealer (second card hidden later)
-    dealer_card1 = draw_card()
-    dealer_card2 = draw_card()
-    dealer_hand.extend([dealer_card1, dealer_card2])
-    # dealer_hand.append(dealer_card)
-
-    # Show first card face up
-    show_card(dealer_card1, dealer_cards_frame, dealer_card_images)
-
-    # Show back of second card
-    hidden_Label = tk.Label(dealer_cards_frame, image=card_back, bg='green')
-    hidden_Label.pack(side="left")
-
-    global dealer_hidden_label
-    dealer_hidden_label = hidden_Label
-
-    hit_button.config(state="normal")
-    stand_button.config(state="normal")
-
-
-def player_hit():
-    card = draw_card()
-    player_hand.append(card)
-    show_card(card, player_cards_frame, player_card_images)
-
-    # Check for bust
-    if calculate_hand_value(player_hand) > 21:
-        messagebox.showinfo("Bust", "You busted! Dealer wins.")
-        end_round(player_lost=True)
-    print("Cards left in deck:", len(round_deck))
-
-
-
-############################# GAME LOGIC ####################################
+############################# Value Counting ####################################
 def calculate_hand_value(hand):
     value = 0
     aces = 0
 
     for card in hand:
-        suit, rank = card
+        rank = card.rank
 
         if rank in ["jack", "queen", "king"]:
             value += 10
@@ -142,54 +158,6 @@ def calculate_hand_value(hand):
         value -= 10
         aces -= 1
     return value
-
-
-def end_round(player_won=False, player_lost=False):
-    global wins, losses
-
-    if player_won:
-        wins += 1
-        wins_label.config(text=f"Wins: {wins}")
-
-    if player_lost:
-        losses += 1
-        losses_label.config(text=f"Losses: {losses}")
-
-    # Disable Hit and Stand after the round
-    hit_button.config(state="disabled")
-    stand_button.config(state="disabled")
-
-    
-def player_stand():
-
-    dealer_hidden_label.destroy()  # remove hidden card back
-
-    # Show dealer's hidden card
-    second_card = dealer_hand[1]
-    show_card(second_card, dealer_cards_frame, dealer_card_images)
-
-    # Dealer hits until 17 or more
-    while calculate_hand_value(dealer_hand) < 17:
-        card = draw_card()
-        dealer_hand.append(card)
-        show_card(card, dealer_cards_frame, dealer_card_images)
-
-    player_value = calculate_hand_value(player_hand)
-    dealer_value = calculate_hand_value(dealer_hand)
-
-    if dealer_value > 21:
-        messagebox.showinfo("Win", "Dealer busts. You win!")
-        end_round(player_won=True)
-    elif player_value > dealer_value:
-        messagebox.showinfo("Win", "You win!")
-        end_round(player_won=True)
-    elif dealer_value > player_value:
-        messagebox.showinfo("Lose", "Dealer wins.")
-        end_round(player_lost=True)
-    else:
-        messagebox.showinfo("Tie", "Push (tie).")
-        end_round()  # no win or loss
-
 
 ############################ ROOT WINDOW SET UP ############################
 # Start the main window and name it
@@ -211,6 +179,9 @@ main_menu_frame = tk.Frame(container, bg='green')
 game_screen = tk.Frame(container, bg = 'green')
 rules_screen = tk.Frame(container, bg = 'green')
 
+game = BlackjackGame()
+
+
 for frame in (main_menu_frame, game_screen, rules_screen):
     frame.grid(row=0, column=0, sticky='nsew')
 
@@ -226,7 +197,7 @@ tk.Label(main_menu_frame, text = 'From Addiction Import Blackjack',
 tk.Button(main_menu_frame, text="Play Blackjack",
           font=("Impact", 16),
           width=20,
-          command = goto_game
+          command=lambda: [show_frame(game_screen), game.start_round()]
         ).pack(pady=10)
 tk.Button(main_menu_frame, text="Rules", 
           font=("Impact", 16), 
@@ -305,11 +276,11 @@ player_cards_frame.pack(pady=10)
 button_frame = tk.Frame(game_screen, bg="green")
 button_frame.pack(pady=20)
 
-hit_button = tk.Button(button_frame, text="Hit", width=12, command=player_hit)
+hit_button = tk.Button(button_frame, text="Hit", width=12, command=lambda: game.player_hit())
 hit_button.grid(row=0, column=0, padx=10)
-stand_button = tk.Button(button_frame, text="Stand", width=12, command=player_stand)
+stand_button = tk.Button(button_frame, text="Stand", width=12, command=lambda: game.player_stand())
 stand_button.grid(row=0, column=1, padx=10)
-tk.Button(button_frame, text="Restart", width=12, command=start_round).grid(row=0, column=2, padx=10)
+tk.Button(button_frame, text="Restart", width=12, command=lambda: game.start_round()).grid(row=0, column=2, padx=10)
 tk.Button(button_frame, text="Exit to Menu", width=12,
           command=lambda: show_frame(main_menu_frame)).grid(row=0, column=3, padx=10)
 
