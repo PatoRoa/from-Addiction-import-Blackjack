@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, PhotoImage
+import os
+import json
 from deck import Deck
 from card import Card
 
@@ -21,6 +23,7 @@ class BlackjackGame:
         self.losses = 0
         self.deck = None
         self.hidden_label = None
+        self.load_stats()
 
     def start_round(self):
 
@@ -117,10 +120,29 @@ class BlackjackGame:
         if player_lost:
             self.losses += 1
             losses_label.config(text=f"Losses: {self.losses}")
+        
+        #saving score
+        self.save_stats()
 
         # Disable buttons
         hit_button.config(state="disabled")
         stand_button.config(state="disabled")
+
+    def load_stats(self):
+        if os.path.exists("stats.json"):
+            with open("stats.json", "r") as f:
+                data = json.load(f)
+                self.wins = data.get("wins", 0)
+                self.losses = data.get("losses", 0)
+
+    def save_stats(self):
+        data = {"wins": self.wins, "losses": self.losses}
+        with open("stats.json", "w") as f:
+            json.dump(data, f)
+                    
+    def update_stats_labels(self):
+        wins_label.config(text=f"Wins: {self.wins}")
+        losses_label.config(text=f"Losses: {self.losses}")
 
 
 
@@ -293,6 +315,9 @@ losses_label = tk.Label(stats_frame, text="Losses: 0", font=("Arial", 16), bg="g
 
 wins_label.grid(row=0, column=0, padx=20)
 losses_label.grid(row=0, column=1, padx=20)
+
+game.update_stats_labels()
+
 
 
 # Game frame
