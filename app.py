@@ -144,7 +144,15 @@ class BlackjackGame:
         wins_label.config(text=f"Wins: {self.wins}")
         losses_label.config(text=f"Losses: {self.losses}")
 
+    def reset_stats(self):
+        self.wins = 0
+        self.losses = 0
+        data = {"wins": self.wins, "losses": self.losses}
+        with open("stats.json", "w") as f:
+            json.dump(data, f)
 
+        wins_label.config(text=f"Wins: {self.wins}")
+        losses_label.config(text=f"Losses: {self.losses}")
 
 
 ############################## CARD FUNCTIONS ##############################
@@ -260,7 +268,6 @@ tk.Label(rules_screen,
          wraplength=750
          ).pack(pady=40, padx=20, fill="both", expand=False)
 
-# Hitting the griddy
 
 # Back to Main Menu button
 tk.Button(rules_screen, text="Main Menu",
@@ -305,6 +312,9 @@ stand_button.grid(row=0, column=1, padx=10)
 tk.Button(button_frame, text="Restart", width=12, command=lambda: game.start_round()).grid(row=0, column=2, padx=10)
 tk.Button(button_frame, text="Exit to Menu", width=12,
           command=lambda: show_frame(main_menu_frame)).grid(row=0, column=3, padx=10)
+
+reset_stats_button = tk.Button(button_frame, text="Reset Stats", width=12, command=lambda: game.reset_stats())
+reset_stats_button.grid(row=0, column=4, padx=10)
 
 # Win/Loss Counter
 stats_frame = tk.Frame(game_screen, bg="green")
